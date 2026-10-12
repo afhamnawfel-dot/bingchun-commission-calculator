@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bing Chun Commission Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Header -->
+    <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-6 border-b border-slate-200 dark:border-slate-800 mb-8 gap-4">
+      <div>
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 bg-emerald-500 text-white rounded-xl shadow-lg shadow-emerald-500/20">
+            <i class="fa-solid font-bold fa-calculator text-2xl"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Bing Chun Commission Calculator</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Financial distribution & yield analysis engine</p>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 self-end sm:self-auto">
+        <button id="themeToggle" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+          <i class="fa-solid fa-moon dark:hidden"></i>
+          <i class="fa-solid fa-sun hidden dark:block text-amber-400"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Presets Bar -->
+    <div class="mb-8 p-4 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700/60">
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3 block">Quick Scenario Presets</span>
+      <div class="flex flex-wrap gap-2">
+        <button onclick="applyPreset(594370, 0.242, 0.120, 0.042)" class="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 transition">
+          Standard Scenario (24.2%)
+        </button>
+        <button onclick="applyPreset(1000000, 0.200, 0.100, 0.042)" class="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 hover:bg-slate-200 transition">
+          High Volume (20.0%)
+        </button>
+        <button onclick="applyPreset(594370, 0.150, 0.080, 0.042)" class="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 hover:bg-slate-200 transition">
+          Reduced Fee (15.0%)
+        </button>
+        <button onclick="applyPreset(594370, 0.242, 0.120, 0.000)" class="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 hover:bg-slate-200 transition">
+          Tax Exempt (0.0% VAT)
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      
+      <!-- Inputs Column -->
+      <div class="lg:col-span-5 space-y-6">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200/80 dark:border-slate-700/60">
+          <h2 class="text-lg font-bold mb-5 flex items-center gap-2 text-slate-900 dark:text-white">
+            <i class="fa-solid fa-sliders text-emerald-500"></i> Parameters
+          </h2>
+
+          <div class="space-y-5">
+            <!-- Sales -->
+            <div>
+              <div class="flex justify-between items-center mb-1.5">
+                <label class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Sales (Inc VAT)</label>
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-0 pl-2.5 flex items-center text-xs text-slate-400">$</span>
+                  <input type="number" id="salesInput" value="594370" step="1000" class="w-32 pl-6 pr-2 py-1 text-right text-sm font-semibold rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+              </div>
+              <input type="range" id="salesRange" min="10000" max="2000000" step="5000" value="594370" class="w-full accent-emerald-500 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg">
+            </div>
+
+            <!-- Commission Rate -->
+            <div>
+              <div class="flex justify-between items-center mb-1.5">
+                <label class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Commission Rate</label>
+                <div class="relative">
+                  <input type="number" id="commInput" value="24.2" step="0.1" class="w-24 pr-6 py-1 text-right text-sm font-semibold rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500 outline-none">
+                  <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-xs text-slate-400">%</span>
+                </div>
+              </div>
+              <input type="range" id="commRange" min="0" max="50" step="0.1" value="24.2" class="w-full accent-emerald-500 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg">
+            </div>
+
+            <!-- Pick & Pack Fee -->
+            <div>
+              <div class="flex justify-between items-center mb-1.5">
+                <label class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Pick & Pack Fee</label>
+                <div class="relative">
+                  <input type="number" id="pickInput" value="12.0" step="0.1" class="w-24 pr-6 py-1 text-right text-sm font-semibold rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500 outline-none">
+                  <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-xs text-slate-400">%</span>
+                </div>
+              </div>
+              <input type="range" id="pickRange" min="0" max="30" step="0.1" value="12.0" class="w-full accent-emerald-500 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg">
+            </div>
+
+            <!-- VAT & SSCL Rate -->
+            <div>
+              <div class="flex justify-between items-center mb-1.5">
+                <label class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">VAT & SSCL Rate</label>
+                <div class="relative">
+                  <input type="number" id="vatInput" value="4.2" step="0.1" class="w-24 pr-6 py-1 text-right text-sm font-semibold rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500 outline-none">
+                  <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-xs text-slate-400">%</span>
+                </div>
+              </div>
+              <input type="range" id="vatRange" min="0" max="20" step="0.1" value="4.2" class="w-full accent-emerald-500 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg">
+            </div>
+          </div>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700/60">
+            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Net Yield %</div>
+            <div id="netYieldPercent" class="text-2xl font-black text-emerald-600 dark:text-emerald-400">87.8%</div>
+            <p class="text-[11px] text-slate-400 mt-1">Retained from total sales</p>
+          </div>
+          <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700/60">
+            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Actual Commission</div>
+            <div id="actualCommPercent" class="text-2xl font-black text-slate-800 dark:text-slate-100">8.0%</div>
+            <p class="text-[11px] text-slate-400 mt-1">Effective net fee rate</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results & Visualizations Column -->
+      <div class="lg:col-span-7 space-y-6">
+        
+        <!-- Key Output Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-6 rounded-2xl shadow-md">
+            <div class="text-xs font-medium text-emerald-100 uppercase tracking-wider">Net Payment</div>
+            <div id="cardNetPayment" class="text-3xl font-black mt-2">$521,856.86</div>
+            <div class="text-xs text-emerald-200 mt-1">Sales − Commission + Pick & Pack</div>
+          </div>
+          <div class="bg-slate-800 dark:bg-slate-900 border border-slate-700 text-white p-6 rounded-2xl shadow-md">
+            <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">Gross Payment with VAT</div>
+            <div id="cardGrossPayment" class="text-3xl font-black mt-2">$546,820.40</div>
+            <div class="text-xs text-slate-400 mt-1">Net Payment + VAT & SSCL</div>
+          </div>
+        </div>
+
+        <!-- Breakdown Table & Analytics -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200/80 dark:border-slate-700/60">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">Detailed Financial Breakdown</h3>
+            <div class="flex gap-2">
+              <button onclick="copySummary()" class="p-2 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Copy to Clipboard">
+                <i class="fa-regular fa-copy"></i>
+              </button>
+              <button onclick="downloadCSV()" class="p-2 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Export CSV">
+                <i class="fa-solid fa-file-csv"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead class="text-xs uppercase bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                <tr>
+                  <th class="py-3 px-4">Line Item</th>
+                  <th class="py-3 px-4 text-right">Rate</th>
+                  <th class="py-3 px-4 text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+                <tr>
+                  <td class="py-3 px-4 font-semibold text-slate-900 dark:text-slate-100">Sales (Inc VAT)</td>
+                  <td class="py-3 px-4 text-right text-slate-400">—</td>
+                  <td id="tblSales" class="py-3 px-4 text-right font-medium">$594,370.00</td>
+                </tr>
+                <tr class="text-rose-600 dark:text-rose-400">
+                  <td class="py-3 px-4">Commission Rate</td>
+                  <td id="tblCommRate" class="py-3 px-4 text-right">24.2%</td>
+                  <td id="tblCommAmt" class="py-3 px-4 text-right font-medium">-$143,837.54</td>
+                </tr>
+                <tr class="text-blue-600 dark:text-blue-400">
+                  <td class="py-3 px-4">Pick and Pack Fee</td>
+                  <td id="tblPickRate" class="py-3 px-4 text-right">12.0%</td>
+                  <td id="tblPickAmt" class="py-3 px-4 text-right font-medium">+$71,324.40</td>
+                </tr>
+                <tr class="text-amber-600 dark:text-amber-400">
+                  <td class="py-3 px-4">VAT & SSCL (Claimable)</td>
+                  <td id="tblVatRate" class="py-3 px-4 text-right">4.2%</td>
+                  <td id="tblVatAmt" class="py-3 px-4 text-right font-medium">+$24,963.54</td>
+                </tr>
+                <tr class="bg-emerald-50/50 dark:bg-emerald-950/20 font-bold text-slate-900 dark:text-white">
+                  <td class="py-3 px-4">Net Payment</td>
+                  <td id="tblNetRate" class="py-3 px-4 text-right text-emerald-600">87.8%</td>
+                  <td id="tblNetAmt" class="py-3 px-4 text-right text-emerald-600">$521,856.86</td>
+                </tr>
+                <tr class="bg-slate-50/80 dark:bg-slate-900/80 font-bold text-slate-900 dark:text-white">
+                  <td class="py-3 px-4">Gross Payment with VAT</td>
+                  <td class="py-3 px-4 text-right text-slate-400">—</td>
+                  <td id="tblGrossAmt" class="py-3 px-4 text-right">$546,820.40</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Donut Visual Chart -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200/80 dark:border-slate-700/60">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-4">Financial Allocation Breakdown</h3>
+          <div class="h-56 relative flex items-center justify-center">
+            <canvas id="allocationChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Elements
+    const salesInput = document.getElementById('salesInput');
+    const salesRange = document.getElementById('salesRange');
+    const commInput = document.getElementById('commInput');
+    const commRange = document.getElementById('commRange');
+    const pickInput = document.getElementById('pickInput');
+    const pickRange = document.getElementById('pickRange');
+    const vatInput = document.getElementById('vatInput');
+    const vatRange = document.getElementById('vatRange');
+
+    let chart = null;
+
+    function formatCurrency(val) {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(val);
+    }
+
+    function calculate() {
+      const sales = parseFloat(salesInput.value) || 0;
+      const commRate = (parseFloat(commInput.value) || 0) / 100;
+      const pickRate = (parseFloat(pickInput.value) || 0) / 100;
+      const vatRate = (parseFloat(vatInput.value) || 0) / 100;
+
+      const commAmt = sales * commRate;
+      const pickAmt = sales * pickRate;
+      const vatAmt = sales * vatRate;
+
+      const netPayment = sales - commAmt + pickAmt;
+      const grossPayment = netPayment + vatAmt;
+
+      const netYield = sales > 0 ? (netPayment / sales) : 0;
+      const actualComm = sales > 0 ? (1 - (grossPayment / sales)) : 0;
+
+      // Update Card Displays
+      document.getElementById('cardNetPayment').innerText = formatCurrency(netPayment);
+      document.getElementById('cardGrossPayment').innerText = formatCurrency(grossPayment);
+      document.getElementById('netYieldPercent').innerText = (netYield * 100).toFixed(1) + '%';
+      document.getElementById('actualCommPercent').innerText = (actualComm * 100).toFixed(1) + '%';
+
+      // Update Table
+      document.getElementById('tblSales').innerText = formatCurrency(sales);
+      document.getElementById('tblCommRate').innerText = (commRate * 100).toFixed(1) + '%';
+      document.getElementById('tblCommAmt').innerText = '-' + formatCurrency(commAmt);
+      document.getElementById('tblPickRate').innerText = (pickRate * 100).toFixed(1) + '%';
+      document.getElementById('tblPickAmt').innerText = '+' + formatCurrency(pickAmt);
+      document.getElementById('tblVatRate').innerText = (vatRate * 100).toFixed(1) + '%';
+      document.getElementById('tblVatAmt').innerText = '+' + formatCurrency(vatAmt);
+      document.getElementById('tblNetRate').innerText = (netYield * 100).toFixed(1) + '%';
+      document.getElementById('tblNetAmt').innerText = formatCurrency(netPayment);
+      document.getElementById('tblGrossAmt').innerText = formatCurrency(grossPayment);
+
+      updateChart(netPayment, commAmt, pickAmt, vatAmt);
+    }
+
+    function syncInputs(input, range) {
+      input.addEventListener('input', () => { range.value = input.value; calculate(); });
+      range.addEventListener('input', () => { input.value = range.value; calculate(); });
+    }
+
+    syncInputs(salesInput, salesRange);
+    syncInputs(commInput, commRange);
+    syncInputs(pickInput, pickRange);
+    syncInputs(vatInput, vatRange);
+
+    function applyPreset(sales, comm, pick, vat) {
+      salesInput.value = sales; salesRange.value = sales;
+      commInput.value = (comm * 100).toFixed(1); commRange.value = commInput.value;
+      pickInput.value = (pick * 100).toFixed(1); pickRange.value = pickInput.value;
+      vatInput.value = (vat * 100).toFixed(1); vatRange.value = vatInput.value;
+      calculate();
+    }
+
+    function initChart() {
+      const ctx = document.getElementById('allocationChart').getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Net Payment', 'Commission Deducted', 'Pick & Pack Fee', 'VAT & SSCL'],
+          datasets: [{
+            data: [521856.86, 143837.54, 71324.40, 24963.54],
+            backgroundColor: ['#10b981', '#f43f5e', '#3b82f6', '#f59e0b'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } }
+          },
+          cutout: '70%'
+        }
+      });
+    }
+
+    function updateChart(net, comm, pick, vat) {
+      if (!chart) return;
+      chart.data.datasets[0].data = [net, comm, pick, vat];
+      chart.update();
+    }
+
+    // Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+    });
+
+    // Copy & Export
+    function copySummary() {
+      const text = `Bing Chun Calculator Summary:\n` +
+        `Sales: ${salesInput.value}\n` +
+        `Net Payment: ${document.getElementById('cardNetPayment').innerText}\n` +
+        `Gross Payment w/ VAT: ${document.getElementById('cardGrossPayment').innerText}`;
+      navigator.clipboard.writeText(text);
+      alert('Summary copied to clipboard!');
+    }
+
+    function downloadCSV() {
+      const csv = `Line Item,Amount\n` +
+        `Sales,${salesInput.value}\n` +
+        `Net Payment,${document.getElementById('cardNetPayment').innerText}\n` +
+        `Gross Payment with VAT,${document.getElementById('cardGrossPayment').innerText}\n`;
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.setAttribute('href', url);
+      a.setAttribute('download', 'commission_breakdown.csv');
+      a.click();
+    }
+
+    // Initialize
+    window.onload = () => {
+      initChart();
+      calculate();
+    };
+  </script>
+</body>
+</html>
